@@ -17,32 +17,6 @@ O trabalho é dividido em duas partes progressivas.
 
 A entrega final consiste em um **relatório técnico** e no **código-fonte** do servidor. Adicionalmente, cada grupo deverá apresentar sua solução (somente para o professor) e participará de um **teste de interoperabilidade** com outro grupo durante a aula de apresentação.
 
-## Ambiente de Execução
-
-O servidor executa em uma máquina do grupo e é acessado a partir de **outras máquinas** da rede.
-
-* **Porta:** utilizar uma porta alta (acima de 1024).
-* **Bind:** o servidor deve escutar em `0.0.0.0` (todas as interfaces), não em `127.0.0.1` (loopback).
-* **Captura:** Wireshark na interface de rede da máquina, com filtro `tcp.port == <porta do servidor>`.
-* **Cliente:** navegador e `curl`.
-
-### Verificação inicial (fazer antes de implementar)
-
-Antes de escrever qualquer código, confirme que as máquinas do grupo se enxergam:
-
-1. Descubra o endereço IP de cada máquina (`ipconfig`).
-2. A partir de uma máquina, teste o alcance da outra (`ping <ip>`).
-3. Confirme que o Wireshark lista e captura na interface de rede.
-
-> Se as máquinas não se alcançarem, comunique ao professor **imediatamente**. As medições da Parte 2 dependem de comunicação entre máquinas distintas.
-
-### Restrições Técnicas
-
-* **Linguagem:** livre, desde que execute na VDI sem privilégios de administrador e sem instalação de runtime adicional.
-* **Sockets:** a comunicação deve usar a API de sockets TCP diretamente (`socket`, `bind`, `listen`, `accept`, `recv`, `send`).
-* **Proibido:** qualquer biblioteca ou módulo que implemente HTTP do lado servidor (`http.server`, `Flask`, `Express`, `HttpListener`, etc.). O parsing e a geração das mensagens HTTP devem ser feitos pelo grupo.
-* **Permitido:** bibliotecas da linguagem para manipulação de arquivos, datas, hashes e concorrência (threads).
-
 ## Parte 1: servidor
 
 ### Regras de implementação
