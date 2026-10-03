@@ -2,31 +2,50 @@ import java.net.ServerSocket;
 import java.util.*;
 
 private static int port = 1025;
-private static int servidorPorta = 8080;
+private static int servidorPorta; // Server fica escutando a port
+private static String servidorRoot; // Considera como raiz
+private static RequestHTTP requisicao;
 
-void main(String[] args) throws IOException {
+void main(String[] args){
 
     interpretarRequisicao(args);
 
     try {
         // Bloqueante, ou seja, espera uma conexão
         ServerSocket serverSocket = new ServerSocket(servidorPorta);
-        System.out.println("Aguradanodo conexão...: ");
-
-
-        Socket socket = new Socket("localhost", servidorPorta);
-
-        Thread.sleep(5000);
+        System.out.println("Waiting connection...: ");
 
         Socket cliente = serverSocket.accept();
-        System.out.println("Cliente conectado");
+
+        // Recebo requisição do cliente
+        cliente.getInputStream();
+
+        parseRequisicao(cliente.getInputStream());
+
+        System.out.println("\nConnection close!");
 
     } catch (IOException e) {
         e.printStackTrace();
-    } catch (InterruptedException e) {
-        throw new RuntimeException(e);
     }
 
+
+}
+
+// Recebe requisção e trata ela
+private void parseRequisicao(InputStream clienteInputStream) throws IOException {
+
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clienteInputStream));
+
+    // Transforma requisicao em array de strings
+    String[] req = bufferedReader.readAllLines().toArray(new String[0]);
+
+    for (int i = 0; i < req.length; i++) {
+
+        System.out.println("\n"+req[i]);
+
+    }
+
+    //requisicao = new RequestHTTP();
 
 }
 
@@ -34,13 +53,25 @@ void main(String[] args) throws IOException {
 // Deverá interpretar a requisição, argumento por argumento, para conexão
 private void interpretarRequisicao(String[] args) {
 
-    servidorPorta = Integer.parseInt(args[1]);
+    for (int i = 0; i < args.length; i++) {
+        String req =  args[i];
 
-//    String[] requisicao = args[0].split(" ");
-//
-//    for (int i = 0; i < requisicao.length; i++) {
-//
-//        System.out.printf("%s ", requisicao[i]);
-//    }
+
+        // Le a requisição recebida e divide no parâmetro certo - feito para receber requisição fora de ordem
+        switch (req) {
+            case "--port":{
+                servidorPorta = Integer.parseInt(args[i+=1]);
+                break;
+            }
+            case "--root":{
+                servidorRoot = args[i+=1];
+                break;
+            }
+            default:{
+                    throw new IllegalArgumentException("Parametro invalido");
+            }
+        }
+
+    }
 
 }
