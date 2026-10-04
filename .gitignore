@@ -1,0 +1,8 @@
+# Compilação local Java
+out/
+*.class
+
+# Documentos locais não versionados
+/docs/AnaliseImplementacaoPendente.md
+/docs/ComoFunciona.md
+/docs/CasosDeTeste.md
