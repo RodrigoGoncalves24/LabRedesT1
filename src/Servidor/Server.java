@@ -3,11 +3,12 @@ package Servidor;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
 
 
 /// AGORA, IDENTICAR A REQUSIÇÃO DO USUÁRIO, LOCALIZAR O CONTEÚDO E RETORNAR
@@ -20,11 +21,16 @@ import java.util.Objects;
 
 public class Server {
     private static int port = 1025;
-    private static int servidorPorta;
-    private static String servidorRoot;
-    private static RequestHTTP requisicao;
+    private static int servidorPorta = 0;
+    private static String servidorRoot = "";
+    private static RequestHTTP requisicaoCompleta;
+    private static String finalPath = " ";
+    private static String codeReq = " ";
 
     private static final ArrayList<String> METHODS = new ArrayList<>(List.of("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"));
+
+    private static Path root = Paths.get("./www");
+    private static String request;
 
     private static String[] methodVersion;
     private static String[] userAgent;
@@ -45,10 +51,15 @@ public class Server {
 
             parseRequisicao(cliente.getInputStream());
 
+            // Combina o caimnho para achar a árvore de diretório
+            root = Path.of(servidorRoot);
+
             // Escrevendo o retorno
             OutputStream out = cliente.getOutputStream();
 
-            retornoRequisicao(out);
+            retornoRequisicao(out, finalPath);
+
+            //System.out.println(requisicaoCompleta.toString());
 
             System.out.println("\nConnection close!");
 
@@ -59,12 +70,12 @@ public class Server {
 
     }
 
-    private void retornoRequisicao(OutputStream out) throws IOException {
+    private void retornoRequisicao(OutputStream out, String request) throws IOException {
 
-        String resposta = "Hello World";
-        Response response = new Response("200", ContentType.txt, resposta, resposta.length());
 
-        resposta = response.toString();
+        Response response = new Response(codeReq, ContentType.txt, request, request.length());
+
+        String resposta = response.toString();
         out.write(resposta.getBytes());
         out.flush();
     }
@@ -88,8 +99,6 @@ public class Server {
         int pos = 0;
         String valor = req[pos];
 
-        System.out.println(Arrays.toString(req));
-
         while (!Objects.equals(valor, "") && pos < req.length) {
             valor = req[pos];
 
@@ -104,7 +113,7 @@ public class Server {
             pos++;
 
         }
-        requisicao = new RequestHTTP(methodVersion, userAgent, hostLocalHost);
+        requisicaoCompleta = new RequestHTTP(methodVersion, userAgent, hostLocalHost);
 
     }
 
@@ -128,12 +137,38 @@ public class Server {
      *
      */
 
-    private void resolveReqHttp(String resolveReqHttp) {
+    private void resolveReqHttp(String resolveReqHttp) throws IOException {
         String[] params = resolveReqHttp.split(" ");
+
+        // Completa enviada pelo usuário
+        request = params[0];
+
+        if (request.contains("GET")) {
+            request = params[1].substring(1);
+            System.out.println(request);
+        }
+
+        root = root.resolve(request);
+
+        if (verificaExistenciaArquivo(root)) {
+            System.out.println("FILE EXITS!");
+            finalPath = Files.readString(root);
+        } else {
+            System.out.println("FILE DO NOT EXIST");
+        }
 
 
         methodVersion = new String[]{params[0], params[1], params[2]};
+    }
 
+    private boolean verificaExistenciaArquivo(Path root) {
+
+        if (Files.exists(root)) {
+            codeReq = "200";
+            return true;
+        }
+        codeReq = "403";
+        return false;
     }
 
 
